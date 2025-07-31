@@ -3,12 +3,13 @@
 
 import TemplateComponent from "@/components/template";
 import WizardComponent from "@/components/wizard.component";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BusinessStructure from "./components/business.structure";
 import ContactPerson from "./components/contact.person";
 import ReviewSubmit from "./components/review.submit";
 import Company from "@/models/company";
 import CompanyContact from "@/models/company.contact";
+import { getCompanyFromLocalStorage, setCompanyToLocalStorage } from "@/persistences/company";
 
 export default function HomeClient() {
     const [step, setStep] = useState<number>(0);
@@ -22,6 +23,7 @@ export default function HomeClient() {
         const next = step + 1;
         setSubTitle('In progress');
         setCompany(updateCompany);
+        setCompanyToLocalStorage(updateCompany);
         setStep(next);
     }
 
@@ -38,8 +40,17 @@ export default function HomeClient() {
     const onComplete = () => {
         setSubTitle('success');
         setSuccess(true);
+        setCompanyToLocalStorage({
+            address: {},
+            contact: {}
+        } as Company)
     }
-
+    useEffect(() =>{
+        const storeCompany = getCompanyFromLocalStorage();
+        if(storeCompany){
+            setCompany(storeCompany);
+        }
+    }, [])
     return (
         <TemplateComponent subTitleType={subTitle} subTitle={subTitle} title={'New Company'}>
             <WizardComponent stepDisabled={success} currentStep={step} onGoToStep={(step: number) => setStep(step)}>
